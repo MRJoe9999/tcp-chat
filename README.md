@@ -8,6 +8,17 @@
 6. And then you can start chat
 7. You can open another terminal and chat with each other
 
+# Commands for testing
+1. to delay messages ```sudo tc qdisc add dev lo root netem delay 100ms```
+2. for packet loss ```sudo tc qdisc add dev lo root netem loss 30%```
+# must remove the rule before done testing
+1. here is the command to remove the rule ```sudo tc qdisc del dev lo root```
+
+# Disconnect from the server
+1. run this command on the terminal where the client is running
+```\quit```
+
+
 # link to video
 
 

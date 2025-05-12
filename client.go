@@ -17,8 +17,6 @@ func main() {
 	}
 	defer conn.Close()
 
-	fmt.Println("Connected to server. You can start typing messages.")
-
 	// Channel to receive server messages
 	go receiveMessages(conn)
 
@@ -30,14 +28,14 @@ func main() {
 			fmt.Println("Disconnecting...")
 			return
 		}
-		startTime := time.Now()
+		sendTime := time.Now()
+		fmt.Printf("Sent at: %s\n", sendTime.Format("15:04:05.000"))
 		_, err := fmt.Fprintf(conn, "%s\n", text)
 		if err != nil {
 			fmt.Println("Error sending message:", err)
 			return
 		}
-		duration := time.Since(startTime)
-		fmt.Printf("Latency: %v\n", duration) // Print the latency (round-trip time)
+
 	}
 
 	if scanner.Err() != nil {
@@ -54,6 +52,7 @@ func receiveMessages(conn net.Conn) {
 			fmt.Println("Diconnected from server.")
 			os.Exit(0)
 		}
-		fmt.Print(message)
+		receiveTime := time.Now()
+		fmt.Printf("Received at: %s → %s", receiveTime.Format("15:04:05.000"), message)
 	}
 }

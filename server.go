@@ -7,10 +7,15 @@ import (
 	"sync"
 )
 
+type BroadcastMessage struct {
+	sender net.Conn
+	text   string
+}
+
 var (
 	clients   = make(map[net.Conn]bool) // All connected clients
 	clientsMu sync.Mutex                // Protects the clients map
-	broadcast = make(chan string)       // Channel for broadcasting messages
+	broadcast = make(chan BroadcastMessage)
 )
 
 func main() {
@@ -49,20 +54,24 @@ func main() {
 
 func handleClient(conn net.Conn) {
 	defer func() {
-		// Clean up when client disconnects
 		clientsMu.Lock()
 		delete(clients, conn)
 		clientsMu.Unlock()
 		conn.Close()
 		fmt.Println("Client disconnected:", conn.RemoteAddr())
 	}()
+
 	conn.Write([]byte("Welcome to the chat server! Enter your name to start chatting.\n"))
 	reader := bufio.NewReader(conn)
 	username, _ := reader.ReadString('\n')
-	username = username[:len(username)-1]
+	username = username[:len(username)-1] // Remove newline
 	conn.Write([]byte("Hello " + username + "! You can start chatting now.\n"))
 
-	broadcast <- fmt.Sprintf("%s has joined the chat.\n", username)
+	broadcast <- BroadcastMessage{
+		sender: conn,
+		text:   fmt.Sprintf("%s has joined the chat.\n", username),
+	}
+
 	for {
 		// Read message from client
 		message, err := reader.ReadString('\n')
@@ -71,24 +80,25 @@ func handleClient(conn net.Conn) {
 		}
 
 		// Send message to broadcast channel
-		broadcast <- fmt.Sprintf("%s %s %s", username, conn.RemoteAddr(), message)
-
+		broadcast <- BroadcastMessage{
+			sender: conn,
+			text:   fmt.Sprintf("%s [%s]: %s", username, conn.RemoteAddr(), message),
+		}
 	}
 }
 
 func handleBroadcast() {
 	for {
-		// Receive a message to broadcast
 		msg := <-broadcast
 
-		// Send the message to all clients
 		clientsMu.Lock()
 		for client := range clients {
-			_, err := fmt.Fprint(client, msg)
-			if err != nil {
-				// Problem with this client; close it
-				client.Close()
-				delete(clients, client)
+			if client != msg.sender {
+				_, err := fmt.Fprint(client, msg.text)
+				if err != nil {
+					client.Close()
+					delete(clients, client)
+				}
 			}
 		}
 		clientsMu.Unlock()
