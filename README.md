@@ -11,7 +11,7 @@
 # Commands for testing
 1. to delay messages ```sudo tc qdisc add dev lo root netem delay 100ms```
 2. for packet loss ```sudo tc qdisc add dev lo root netem loss 30%```
-# must remove the rule before done testing
+# must remove the rule after done testing
 1. here is the command to remove the rule ```sudo tc qdisc del dev lo root```
 
 # Disconnect from the server
