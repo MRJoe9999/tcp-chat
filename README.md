@@ -20,8 +20,10 @@
 
 
 # link to video
-
+https://youtu.be/K8WiN97yVhI
 
 # link to presentation
+https://www.canva.com/design/DAGnKL9B77Y/IJerSwG_jNwY-RvH-bOdwA/edit?utm_content=DAGnKL9B77Y&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
 
 
